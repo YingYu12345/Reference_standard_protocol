@@ -1,0 +1,27 @@
+#!/usr/bin/env Rscript
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("GenomeInfoDbData")
+BiocManager::install("GenomeInfoDbData")
+BiocManager::install("ballgown")
+
+library(ballgown)
+
+args<-commandArgs(T)
+
+if (length(args)==0) {
+  stop("At least one argument must be supplied (input file).n", call.=FALSE)
+} else if (length(args)==1) {
+  # default output file
+  args[2] = "FPKM.txt"
+}
+
+data_dir <- "./ballgown"
+bg <- ballgown(samples = args[1])
+#T_fpkm <- texpr(bg, "FPKM")
+G_fpkm <- gexpr(bg)
+
+write.table(G_fpkm, file = args[2], row.names = TRUE, col.names = TRUE, sep = "\t")
+
