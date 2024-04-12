@@ -16,15 +16,6 @@ Welcome to our repository dedicated to the construction of the RNA reference dat
 - [Setup](#setup)
 - [Usage](#usage)
   * [RNA-seq](#RNA-seq)
-  * [Examples](#examples)
-    + [Starting with FASTQ files](#starting-with-fastq-files)
-    + [Starting with BAM files](#starting-with-bam-files)
-    + [Running prep and post separately](#running-prep-and-post-separately)
-    + [Using the paired stats model](#using-the-paired-stats-model)
-    + [Running the statistical model separately](#running-the-statistical-model-separately)
-  * [Tips](#tips)
-  * [All arguments](#all-arguments)
-- [Output](#output)
 
 ## Dependencies
 
