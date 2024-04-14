@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # example:
-# Rscript path-to/homogeneity_assess.R -i path-to/example_expr_homo_log2.csv -m metadata_homo.csv -o path-to/
+#  Rscript path-to/stability_assess.R -i path-to/example_expr_stability_RIN.csv -m path-to/metadata_stability_RIN.txt -o path-to/
 
 suppressPackageStartupMessages(library("optparse"))
 #suppressPackageStartupMessages(library(""))
