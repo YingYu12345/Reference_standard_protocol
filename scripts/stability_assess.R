@@ -26,8 +26,8 @@ opt <- parse_args(OptionParser(option_list=option_list,add_help_option=FALSE))
 #
 
 #test
-opt$input<-"expr_mat/example_expr_stability_RIN.csv"
-opt$metadata<-"expr_mat/metadata_stability_RIN.csv"
+#opt$input<-"expr_mat/example_expr_stability_RIN.csv"
+#opt$metadata<-"expr_mat/metadata_stability_RIN.csv"
 
 
 ##pre analysis
