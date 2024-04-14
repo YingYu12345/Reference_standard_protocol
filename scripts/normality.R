@@ -26,8 +26,8 @@ opt <- parse_args(OptionParser(option_list=option_list,add_help_option=FALSE))
 #
 
 #test
-opt$input<-"data/DEG_limma_2024-04-02.csv"
-opt$passbatch<-"expr_mat/passbatch.csv"
+#opt$input<-"data/DEG_limma_2024-04-02.csv"
+#opt$passbatch<-"expr_mat/passbatch.csv"
 
 
 ##pre analysis
