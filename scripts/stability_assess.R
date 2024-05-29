@@ -23,11 +23,7 @@ option_list <- list(
 # get command line options, if help option encountered print help and exit,
 # otherwise if options not found on command line then set defaults, 
 opt <- parse_args(OptionParser(option_list=option_list,add_help_option=FALSE))
-#
 
-#test
-#opt$input<-"expr_mat/example_expr_stability_RIN.csv"
-#opt$metadata<-"expr_mat/metadata_stability_RIN.csv"
 
 
 ##pre analysis
