@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # example:
-#Rscript path-to/normality.R -i path-to/DEG_limma.csv -m path-to/passbatch.csv -o path-to/
+#Rscript path-to/normality.R -i path-to/DEG_limma_(date).csv -m path-to/batch_included.csv -o path-to/
 
 
 suppressPackageStartupMessages(library("optparse"))
