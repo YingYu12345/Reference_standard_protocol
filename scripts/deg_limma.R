@@ -201,8 +201,8 @@ DEG.cal.other$Type[intersect(which(DEG.cal.other$P.Value<0.05),which(DEG.cal.oth
 
 DEG.cal3<-rbind(DEG.cal.D56,DEG.cal.other)
 
-# Normalization of column names
-
+# Ensure column names are lowercase with underscores
+colnames(DEG.cal3) <- tolower(gsub(".", "_", colnames(DEG.cal3), fixed = TRUE))
 
 # Save results to csv file
 output_csv <- paste0(opt$out_dir, "/DEG_limma_", Sys.Date(), ".csv")

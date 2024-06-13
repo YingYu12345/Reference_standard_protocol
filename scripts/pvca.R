@@ -148,11 +148,11 @@ p1 <- ggplot(RNA_bats_f,aes(x=reorder(name,-value),y=value))+
         legend.margin = margin(0,0,0,0));p1
 
 # Output results to pdf file
-output_png <- paste0(opt$out_dir, "/RNA_PVCA_", Sys.Date(), ".png")  
-ggsave(output_png, plot = p1,
+output_pdf <- paste0(opt$out_dir, "/RNA_PVCA_", Sys.Date(), ".pdf")  
+ggsave(output_pdf, plot = p1,
        width = 5, height = 4)
 
 # Print completion message
 message("Analysis complete! Results saved to: ")
 message(paste("-RNA_PVCA.csv: ", output_csv))
-message(paste("-RNA_PVCA.png: ", output_png))
+message(paste("-RNA_PVCA.pdf: ", output_pdf))

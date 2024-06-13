@@ -1,7 +1,7 @@
 # MCC based on both detected DEG and nonDEG,
 #!/usr/bin/env Rscript
 # example:
-# Rscript path-to/qc_mcc.R -i path-to/DEG_limma_2024-04-02.csv -r path-to/example_ref_data.csv -o path-to/
+# Rscript path-to/qc_mcc.R -i path-to/DEG_limma_(date).csv -r path-to/example_ref_data.csv -o path-to/
 
 # Set CRAN mirror for the script
 options(repos = c(CRAN = "https://mirrors.ustc.edu.cn/CRAN/"))
@@ -41,7 +41,7 @@ suppressPackageStartupMessages(library("Metrics"))
 print_usage <- function() {
   cat("Actual Usage: Rscript qc_mcc.R [options]\n\n")
   cat("Example:\n")
-  cat("  Rscript path-to/qc_mcc.R -i path-to/DEG_limma_2024-04-02.csv -r path-to/example_ref_data.csv -o path-to/\n")
+  cat("  Rscript path-to/qc_mcc.R -i path-to/DEG_limma_(date).csv -r path-to/example_ref_data.csv -o path-to/\n")
   cat("Note: Make sure to replace path-to/ with your actual file paths\n\n")
 }
 print_usage()
@@ -120,9 +120,9 @@ for ( i in 1:nrow(sample_combn)){
     ref_nu_f<-intersect(ref_nu,bothgene)
     ref_nd_f<-intersect(ref_nd,bothgene)
     
-    test_lab_non<-test_lab$gene_compare[test_lab$Type=="non-DEG"]
-    test_lab_up<-test_lab$gene_compare[test_lab$Type=="up-regulate"]
-    test_lab_down<-test_lab$gene_compare[test_lab$Type=="down-regulate"]
+    test_lab_non<-test_lab$gene_compare[test_lab$type=="non-DEG"]
+    test_lab_up<-test_lab$gene_compare[test_lab$type=="up-regulate"]
+    test_lab_down<-test_lab$gene_compare[test_lab$type=="down-regulate"]
     
     test_lab_non<-intersect(test_lab_non,bothgene)
     test_lab_up<-intersect(test_lab_up,bothgene)
@@ -146,7 +146,7 @@ for ( i in 1:nrow(sample_combn)){
   
 }
 
-colnames(DEG_QC)<-c("TP","TN","FN","FP","Precision","Sensitivity","Specificity","F1","MCC","batch","compare")
+colnames(DEG_QC)<-c("tp","tn","fn","fp","precision","sensitivity","specificity","f1","mcc","batch","compare")
 
 DEG_QC<-data.frame(DEG_QC)
 for ( i in 1:9){

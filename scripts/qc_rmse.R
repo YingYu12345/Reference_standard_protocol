@@ -1,7 +1,7 @@
 # Root Mean Square Error (RMSE) is the standard deviation of the residuals (prediction errors). 
 #!/usr/bin/env Rscript
 # example:
-# Rscript path-to/qc_rmse.R -i path-to/DEG_limma_2024-04-02.csv -r path-to/example_ref_data.csv -o path-to/
+# Rscript path-to/qc_rmse.R -i path-to/DEG_limma_(date).csv -r path-to/example_ref_data.csv -o path-to/
 
 # Set CRAN mirror for the script
 options(repos = c(CRAN = "https://mirrors.ustc.edu.cn/CRAN/"))
@@ -41,7 +41,7 @@ suppressPackageStartupMessages(library("Metrics"))
 print_usage <- function() {
   cat("Actual Usage: Rscript qc_rmse.R [options]\n\n")
   cat("Example:\n")
-  cat("  Rscript path-to/qc_rmse.R -i path-to/DEG_limma_2024-04-02.csv -r path-to/example_ref_data.csv -o path-to/\n")
+  cat("  Rscript path-to/qc_rmse.R -i path-to/DEG_limma_(date).csv -r path-to/example_ref_data.csv -o path-to/\n")
   cat("Note: Make sure to replace path-to/ with your actual file paths\n\n")
 }
 print_usage()
@@ -101,10 +101,10 @@ for ( i in 1:length(ubatch)){
   
   colnames(Ref_RE_f)<-paste("ref_",colnames(Ref_RE_f),sep="")
   colnames(testlab_logFC_f)<-paste("testlab_",colnames(testlab_logFC_f),sep="")
-  refvstest<-merge(Ref_RE_f[,c("ref_gene_group","ref_compare","ref_meanlogFC")],testlab_logFC_f[,c("testlab_gene_group","testlab_logFC")],by.x="ref_gene_group",by.y="testlab_gene_group")
+  refvstest<-merge(Ref_RE_f[,c("ref_gene_group","ref_compare","ref_meanlogFC")],testlab_logFC_f[,c("testlab_gene_group","testlab_logfc")],by.x="ref_gene_group",by.y="testlab_gene_group")
   refvstest<-refvstest[apply(refvstest,1,function(x){length(which(is.na(x)))==0}),]
   
-  rmse_value<-rmse(refvstest$testlab_logFC,refvstest$ref_meanlogFC)
+  rmse_value<-rmse(refvstest$testlab_logfc,refvstest$ref_meanlogFC)
   
   log2FC_QC_rmse<-rbind(log2FC_QC_rmse,c(rmse_value,ubatch[i]))
   
@@ -112,8 +112,8 @@ for ( i in 1:length(ubatch)){
 }
 
 log2FC_QC_rmse<-data.frame(log2FC_QC_rmse)
-colnames(log2FC_QC_rmse)<-c("RMSE","batch")
-log2FC_QC_rmse$RMSE<-as.numeric(as.character(log2FC_QC_rmse$RMSE))
+colnames(log2FC_QC_rmse)<-c("rmse","batch")
+log2FC_QC_rmse$rmse<-as.numeric(as.character(log2FC_QC_rmse$rmse))
 
 #DEG_QC21$RMSE<-log2FC_QC_rmse$RMSE[match(rownames(DEG_QC21),log2FC_QC_rmse$batch)]
 

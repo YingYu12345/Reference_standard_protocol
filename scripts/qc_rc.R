@@ -1,7 +1,7 @@
 # RC
 #!/usr/bin/env Rscript
 # example:
-# Rscript path-to/qc_rc.R -i path-to/DEG_limma_2024-04-02.csv -r path-to/example_ref_data.csv -o path-to/
+# Rscript path-to/qc_rc.R -i path-to/DEG_limma_(date).csv -r path-to/example_ref_data.csv -o path-to/
 
 # Set CRAN mirror for the script
 options(repos = c(CRAN = "https://mirrors.ustc.edu.cn/CRAN/"))
@@ -40,7 +40,7 @@ suppressPackageStartupMessages(library("optparse"))
 print_usage <- function() {
   cat("Actual Usage: Rscript qc_rc.R [options]\n\n")
   cat("Example:\n")
-  cat("  Rscript path-to/qc_rc.R -i path-to/DEG_limma_2024-04-02.csv -r path-to/example_ref_data.csv -o path-to/\n")
+  cat("  Rscript path-to/qc_rc.R -i path-to/DEG_limma_(date).csv -r path-to/example_ref_data.csv -o path-to/\n")
   cat("Note: Make sure to replace path-to/ with your actual file paths\n\n")
 }
 print_usage()
@@ -95,18 +95,18 @@ for ( i in 1:length(ubatch)){
   
   colnames(Ref_RE_f)<-paste("ref_",colnames(Ref_RE_f),sep="")
   colnames(testlab_logFC_f)<-paste("testlab_",colnames(testlab_logFC_f),sep="")
-  refvstest<-merge(Ref_RE_f[,c("ref_gene_group","ref_compare","ref_meanlogFC")],testlab_logFC_f[,c("testlab_gene_group","testlab_logFC")],by.x="ref_gene_group",by.y="testlab_gene_group")
+  refvstest<-merge(Ref_RE_f[,c("ref_gene_group","ref_compare","ref_meanlogFC")],testlab_logFC_f[,c("testlab_gene_group","testlab_logfc")],by.x="ref_gene_group",by.y="testlab_gene_group")
   refvstest<-refvstest[apply(refvstest,1,function(x){length(which(is.na(x)))==0}),]
   
-  c1<-cor(refvstest$ref_meanlogFC,refvstest$testlab_logFC)
+  c1<-cor(refvstest$ref_meanlogFC,refvstest$testlab_logfc)
   log2FC_QC_cor<-rbind(log2FC_QC_cor,c(c1,ubatch[i]))
   print(i)
 }
 
 
 log2FC_QC_cor<-data.frame(log2FC_QC_cor)
-colnames(log2FC_QC_cor)<-c("RC","batch")
-log2FC_QC_cor$RC<-as.numeric(as.character(log2FC_QC_cor$RC))
+colnames(log2FC_QC_cor)<-c("rc","batch")
+log2FC_QC_cor$rc<-as.numeric(as.character(log2FC_QC_cor$rc))
 
 ##output
 RCfile<-paste(out_dir,"RC_each_batch_",gsub("-","",Sys.Date()),".csv",sep="")

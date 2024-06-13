@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 # char_ratio.R
 # example:
-# Rscript path-to/char_ratio.R -i path-to/example_expr_multibatch_count.csv -m path-to/metadata.csv -g path-to/detect_genelist_acrossBatch_2024-04-02.csv -d path-to/DEG_limma_2024-04-02.csv -o path-to/
+# Rscript path-to/char_ratio.R -i path-to/example_expr_multibatch_count.csv -m path-to/metadata.csv -g path-to/detect_genelist_acrossBatch_(date).csv -d path-to/DEG_limma_(date).csv -o path-to/
 
 # Set CRAN mirror for the script
 options(repos = c(CRAN = "https://mirrors.ustc.edu.cn/CRAN/"))
@@ -42,7 +42,7 @@ suppressPackageStartupMessages(library(reshape2))
 print_usage <- function() {
   cat("Actual Usage: Rscript char_ratio.R [options]\n\n")
   cat("Example:\n")
-  cat("  Rscript path-to/char_ratio.R -i path-to/example_expr_multibatch_count.csv -m path-to/metadata.csv -g path-to/detect_genelist_acrossBatch_2024-04-02.csv -d path-to/DEG_limma_2024-04-02.csv -o path-to/\n")
+  cat("  Rscript path-to/char_ratio.R -i path-to/example_expr_multibatch_count.csv -m path-to/metadata.csv -g path-to/detect_genelist_acrossBatch_(date).csv -d path-to/DEG_limma_(date).csv -o path-to/\n")
   cat("Note: Make sure to replace path-to/ with your actual file paths\n\n")
 }
 print_usage()
@@ -136,10 +136,10 @@ DEGs_p <- DEGs
 DEGs_p$protocol <- sapply(strsplit(as.character(DEGs_p$batch),"_"),function(x){x[1]})
 DEGs_p$gene_compare <- paste(DEGs_p$gene,DEGs_p$compare)
 
-DEGs_p_dec <- DEGs_p[DEGs_p$gene_compare %in%  detect_genes_pairs$gene_compare,]
+DEGs_p_dec <- DEGs_p[DEGs_p$gene_compare %in% detect_genes_pairs$gene_compare,]
 
 # #filter p<0.05
-DEGs_p_f <- DEGs_p_dec[DEGs_p_dec$`P.Value`<0.05,]
+DEGs_p_f <- DEGs_p_dec[DEGs_p_dec$p_value<0.05,]
 
 DEGs_p_cal <- data.frame(table(paste(DEGs_p_f$gene,DEGs_p_f$compare)))
 DEGs_p_cal$gene <- sapply(strsplit(as.character(DEGs_p_cal$Var1)," "),function(x){x[1]})
@@ -169,8 +169,8 @@ for ( i in 1:nrow(DEGs_p_cal_f_fd2)){
   m<-DEGs_p[intersect(which(DEGs_p$gene==g),which(DEGs_p$compare==c)),]
   
   if(length(which(grepl("P",m$protocol)))>=3 && length(which(grepl("R",m$protocol)))>=3){
-    p<-pvalue(m$logFC,as.factor(m$protocol))
-    f<-tapply(m$logFC,as.factor(m$protocol),mean)
+    p<-pvalue(m$logfc,as.factor(m$protocol))
+    f<-tapply(m$logfc,as.factor(m$protocol),mean)
     fc<-f[1]-f[2]
     prot_fc<-rbind(prot_fc,c(g,c,p,f,fc))
   }
@@ -208,12 +208,12 @@ DEGs_p$gene_compare <- paste(DEGs_p$gene,DEGs_p$compare)
 gene_compare=levels(as.factor(DEGs_p$gene_compare))
 
 mm.DEG<-data.frame(
-  meanlogFC=tapply(DEGs_p$logFC,as.factor(DEGs_p$gene_compare),mean),
-  medianp=tapply(DEGs_p$P.Value,as.factor(DEGs_p$gene_compare),median),
+  meanlogFC=tapply(DEGs_p$logfc,as.factor(DEGs_p$gene_compare),mean),
+  medianp=tapply(DEGs_p$p_value,as.factor(DEGs_p$gene_compare),median),
   gene_compare=levels(as.factor(DEGs_p$gene_compare))
 )
 
-ref_FC_f2$FC <- 2^(mm.DEG$meanlogFC[match(ref_FC_f2$gene_compare,mm.DEG$gene_compare)])
+ref_FC_f2$fc <- 2^(mm.DEG$meanlogFC[match(ref_FC_f2$gene_compare,mm.DEG$gene_compare)])
 ref_FC_f2$medianp <- mm.DEG$medianp[match(ref_FC_f2$gene_compare,mm.DEG$gene_compare)]
 
 # Output results to CSV file

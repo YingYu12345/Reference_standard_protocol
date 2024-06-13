@@ -92,7 +92,7 @@ sbb<-function(intra_list,between_list){
 
 df<-metadata
 df$library<-rownames(df)
-df1<-df[match(colnames(ratio_hom1),df$library),]
+df1<-df[match(colnames(ratioexpr),df$library),]
 
 usample3<-as.character(unique(df$sample))
 
@@ -103,7 +103,7 @@ for ( i in 1:nrow(refdata)){
   
   df2<-df1[df1$sample==s,]
   
-  df2$value<-ratio_hom1[rownames(ratio_hom1)==g,match(df2$library,colnames(ratio_hom1))]
+  df2$value<-as.numeric(ratioexpr[rownames(ratioexpr)==g,match(df2$library,colnames(ratioexpr))])
   
   ############log2FC ubb_1
   intra_list<-df2$value[df2$type=="intra-unit"]

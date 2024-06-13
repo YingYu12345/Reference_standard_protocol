@@ -25,19 +25,17 @@ option_list <- list(
  
   )
 
-# get command line options, if help option encountered print help and exit,
-# otherwise if options not found on command line then set defaults, 
-opt <- parse_args(OptionParser(option_list=option_list,add_help_option=FALSE))
-#
+# Define OptionParser object
+opt_parser <- OptionParser(option_list=option_list, add_help_option=FALSE)
+
+# Parse command-line options
+opt <- parse_args(opt_parser, args = commandArgs(trailingOnly = TRUE))
 
 #test
-opt$uchar<-"expr_mat/Refdata_uchar_example.csv"
-opt$ubb<-"expr_mat/Refdata_ubb_example.csv"
-opt$us<-"expr_mat/Refdata_us_example.csv"
-opt$refdata<-"expr_mat/ref_expr_example.csv"
-
-##pre analysis
-
+# opt$uchar<-"expr_mat/Refdata_uchar_example.csv"
+# opt$ubb<-"expr_mat/Refdata_ubb_example.csv"
+# opt$us<-"expr_mat/Refdata_us_example.csv"
+# opt$refdata<-"expr_mat/ref_expr_example.csv"
 
 ##import uncertainty files
 out_dir<-paste(gsub("/$","",opt$out_dir),"/",sep="")

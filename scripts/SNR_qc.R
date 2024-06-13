@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
-# char_detect.R
+# SNR_qc.R
 # example:
-# Rscript path-to/SNR_qc.R -i path-to/example_expr_multibatch_log2.csv -m path-to/metadata.csv -o path-to/
+# Rscript path-to/SNR_qc.R -i path-to/example_expr_multibatch_log2.csv -m path-to/metadata.csv -s sample_info(eg. "D5,D6,F7,M8") -c config_file -o path-to/
 
 # Set CRAN mirror for the script
 options(repos = c(CRAN = "https://mirrors.ustc.edu.cn/CRAN/"))
@@ -43,20 +43,23 @@ suppressPackageStartupMessages(library(ggplot2))
 print_usage <- function() {
   cat("Actual Usage: Rscript SNR_qc.R [options]\n\n")
   cat("Example:\n")
-  cat("  Rscript path-to/SNR_qc.R -i path-to/example_expr_multibatch_log2.csv -m path-to/metadata.csv -o path-to/\n")
+  cat("  Rscript path-to/SNR_qc.R -i path-to/example_expr_multibatch_log2.csv -m path-to/metadata.csv -s \"D5,D6,F7,M8\"\n -c config_file -o path-to/")
   cat("Note: Make sure to replace path-to/ with your actual file paths\n\n")
 }
 print_usage()
-
 
 # Define command-line option specifications
 option_list <- list(
   make_option(c("-i", "--input"), type="character", default=NULL,
               help="Path to the input file, including the expression matrix and metadata."),
   make_option(c("-m", "--metadata"), type="character", default=NULL,
-              help="Path to the metadata file of the input expression. Note: The metadata file must include three columns: bacth, sample and type. Required!"),
+              help="Path to the metadata file of the input expression. Note: The metadata file must include three columns: batch, sample and type. Required!"),
   make_option(c("-o", "--out_dir"), type="character", default="./",
               help="Path to the output directory [default current directory]."),
+  make_option(c("-s", "--samples"), type="character", default=NULL,
+              help="Comma-separated list of sample names (e.g., \"D5,D6,F7,M8\"). Required!"),
+  make_option(c("-c", "--config"), type="character", default="./scripts/config.R",
+            help="Path to the configuration file [default ./scripts/config.R]"),
   make_option(c("-h", "--help"), action="store_true", default=FALSE,
               help="Show this help message and exit")
 )
@@ -74,10 +77,14 @@ if (opt$help) {
 }
 
 # Check for required command-line options
-if (is.null(opt$input) || is.null(opt$metadata) || is.null(opt$out_dir)) {
+if (is.null(opt$input) || is.null(opt$metadata) || is.null(opt$out_dir) || is.null(opt$samples) || is.null(opt$config)) {
   print_help(opt_parser)
-  stop("Input file, metadata file, and output directory parameters must be provided.", call.=FALSE)
+  stop("Input file, metadata file, output directory, samples parameters, and config file must be provided.", call.=FALSE)
 }
+
+# Parse the samples and configparameter
+samples <- unlist(strsplit(opt$samples, ","))
+source(opt$config)
 
 # define SNR calculation function
 calSNR_pca <- function(exprMat, group) {
@@ -134,33 +141,28 @@ meta <- read.csv(opt$metadata,header=T,stringsAsFactors=F,row.names=1,check.name
 
 # Process metadata
 nbatch <- unique(meta$batch)
-SNR_n <- data.frame("batch_id"=1,"SNR"=1)
-SNR_n <- SNR_n[-1,]
+SNR_n <- data.frame("batch_id"=character(), "SNR"=numeric(), stringsAsFactors=FALSE)
 
-type <- function(x){
-  type<-rep(NA,length(x));#The length is the length of x. The vectors are all na-values.
-  type[grepl("D5",x)]<- "D5";
-  type[grepl("D6",x)]<- "D6";
-  type[grepl("F7",x)]<- "F7";
-  type[grepl("M8",x)]<- "M8";
-  type
+type <- function(x, samples) {
+  type <- rep(NA, length(x)) # Initialize the type vector with NA values
+  for (sample in samples) {
+    type[grepl(sample, x)] <- sample
+  }
+  return(type)
 }
 
-# calculate the SNR for per batch
-for (i in 1:length(nbatch))
-{
-  print(i);print(nbatch[i])
-  logFPKM_nb <- logFPKM[,grep(nbatch[i],colnames(logFPKM))]
-  
-  ntype <- type(colnames(logFPKM_nb))
-  SNR_pca <- calSNR_pca(logFPKM_nb,ntype)
-  temp <- round(SNR_pca$signoise_db,1)
-  SNR_n <- rbind(SNR_n,c(nbatch[i],temp))
+# Calculate the SNR for each batch
+for (i in seq_along(nbatch)) {
+  logFPKM_nb <- logFPKM[, grep(nbatch[i], colnames(logFPKM)), drop=FALSE]
+  ntype <- type(colnames(logFPKM_nb), samples)
+  # print(ntype) # Debugging line
+  SNR_pca <- calSNR_pca(logFPKM_nb, ntype)
+  SNR_n <- rbind(SNR_n, data.frame(batch_id=nbatch[i], SNR=round(SNR_pca$signoise_db, 1)))
 }
 
-colnames(SNR_n) <- c("batch_id","SNR")
 SNR_n$SNR <- as.numeric(SNR_n$SNR)
 SNR_n <- SNR_n[order(SNR_n$SNR, decreasing = TRUE), ]
+colnames(SNR_n) <- c("batch_id","snr")
 
 # SNR Output results to CSV file
 output_csv <- paste0(opt$out_dir, "/SNR_perBatch_", Sys.Date(), ".csv")
@@ -169,7 +171,7 @@ fwrite(SNR_n, output_csv)
 ## plot PCA with SNR
 pca_n <- list()
 
-plot_pca <- function(SNR,image_title,expr,image_name) {
+plot_pca <- function(SNR,image_title,expr,image_name, samples) {
   SNR_n<- round(SNR$signoise_db,1)
   pca.all <- SNR$pca_prcomp
   pcs <- pca.all$x
@@ -179,14 +181,11 @@ plot_pca <- function(SNR,image_title,expr,image_name) {
   
   # Merge with metadata
   pcs <- merge(pcs, meta, by="library")
-  pcs$sample <- factor(pcs$sample, levels=c("D5", "D6", "F7", "M8"))
-  
-  # Define color palette
-  subtype_pal <- c('#4CC3D9' ,'#7BC8A4' ,'#FFC65D', '#F16745')
+  pcs$sample <- factor(pcs$sample, levels=samples)
   
   # Create plot
-  p <- ggplot(pcs, aes(x=PC1, y=PC2, fill=sample)) +
-    geom_point(size=3.5, shape=21) +
+  p <-  ggplot(pcs, aes(x = PC1, y = PC2, fill = sample, color = sample, shape = batch)) +
+    geom_point(size = 3.5) +
     theme_bw() +
     theme(
       axis.text = element_text(),
@@ -195,10 +194,12 @@ plot_pca <- function(SNR,image_title,expr,image_name) {
       plot.title = element_text(hjust=0.5, color="black", face="bold"),
       plot.subtitle = element_text(hjust=0.5)
     ) +
-    guides(
-      fill = guide_legend("Type", override.aes = list(shape=21, fill=subtype_pal))
-    ) +
-    scale_fill_manual("Type", values=subtype_pal) +
+    # guides(
+    #   fill = guide_legend("Type", override.aes = list(shape=colors, fill=shapes))
+    # ) +
+    scale_fill_manual("Type", values = colors) +  # Ensure `colors` is a named vector
+    scale_color_manual("Type", values = colors) +  # Ensure `colors` is a named vector
+    scale_shape_manual("Batch", values = shapes) +
     labs(
       x=sprintf("PC1 (%.2f%%)", summary(pca.all)$importance[2,1]*100),
       y=sprintf("PC2 (%.2f%%)", summary(pca.all)$importance[2,2]*100),
@@ -208,14 +209,14 @@ plot_pca <- function(SNR,image_title,expr,image_name) {
     theme(aspect.ratio=1/1)
   
   # Save plot to file
-  output_png <- paste0(opt$out_dir, "/", image_name, "_", Sys.Date(), ".png")
-  ggsave(output_png, p, width=5, height=5, dpi=300)
+  # output_pdf1 <- paste0(opt$out_dir, "/", image_name, "_", Sys.Date(), ".pdf")
+  # ggsave(output_pdf1, p, width=5, height=5, dpi=300)
   return(p)
 }
 
 ## sort_batch by SNR RANK 
 sbatch <- SNR_n$batch_id
-SNR_s <- data.frame("batch_id"=1,"SNR"=1)
+SNR_s <- data.frame("batch_id"=1,"snr"=1)
 SNR_s <- SNR_s[-1,]
 
 for (i in 1:length(sbatch))
@@ -223,7 +224,7 @@ for (i in 1:length(sbatch))
   print(i);print(sbatch[i])
   logFPKM_nb <- logFPKM[,grep(sbatch[i],colnames(logFPKM))]
   
-  ntype <- type(colnames(logFPKM_nb))
+  ntype <- type(colnames(logFPKM_nb), samples)
   SNR_pca <- calSNR_pca(logFPKM_nb,ntype)
   temp2<- round(SNR_pca$signoise_db,1)
   SNR_s <- rbind(SNR_s,c(sbatch[i],temp2))
@@ -231,24 +232,30 @@ for (i in 1:length(sbatch))
   pca_n[[i]]=p
 }
 
-# # export the png files to a pdf file
-# output_pdf <- paste0(opt$out_dir, "/SNR_perBatch_", Sys.Date(), ".pdf")
-# pdf(file = output_pdf)
-# for (i in 1:length(sbatch))
-# {
-#   print(pca_n[[i]])
-# }
-# dev.off()
+# # export the all pdf files to one pdf file
+output_pdf2 <- paste0(opt$out_dir, "/SNR_perBatch_", Sys.Date(), ".pdf")
+pdf(file = output_pdf2, width = 5, height = 5)
+for (i in 1:length(sbatch))
+{
+  print(pca_n[[i]])
+}
+dev.off()
 
 ## all batches
-ntype <- type(colnames(logFPKM))
+ntype <- type(colnames(logFPKM), samples)
 SNR_pca <- calSNR_pca(logFPKM,ntype)
 p <- plot_pca(SNR_pca,"SNR_allBatch",logFPKM,"SNR_allBatch_")
-output_png <-  paste0(opt$out_dir, "/", "SNR_allBatch", "_", Sys.Date(), ".png")
+p <- p +
+    theme(
+      legend.position = "right",
+      legend.background = element_blank()
+    )
+output_pdf3 <-  paste0(opt$out_dir, "/", "SNR_allBatch", "_", Sys.Date(), ".pdf")
+ggsave(output_pdf3, p, width=5, height=5, dpi=300)
 
 # Print completion message
 message("Analysis complete! Results saved to: ")
 message(paste("-SNR_perBatch.csv: ", output_csv))
-message(paste("-PCA_withSNR_perBatch.png: ", paste0(opt$out_dir, "/")))
-# message(paste("-PCA_withSNR_perBatch.pdf: ", output_pdf))
-message(paste("-PCA_withSNR_allBatch.png: ", output_png))
+# message(paste("-PCA_withSNR_perBatch.pdf: ", paste0(opt$out_dir, "/")))
+message(paste("-PCA_withSNR_perBatch.pdf: ", output_pdf2))
+message(paste("-PCA_withSNR_allBatch.png: ", output_pdf3))

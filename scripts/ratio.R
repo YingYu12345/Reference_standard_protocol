@@ -1,7 +1,8 @@
 #!/usr/bin/env Rscript
 # ratio.R
 # example:
-# Rscript path-to/ratio.R -i path-to/example_expr_multibatch_log2.csv -m path-to/metadata.csv -o path-to/
+# Rscript path-to/ratio.R -i path-to/example_expr_multibatch_log2.csv -m path-to/metadata.csv -r D6 -o path-to/
+
 
 # Set CRAN mirror for the script
 options(repos = c(CRAN = "https://mirrors.ustc.edu.cn/CRAN/"))
@@ -41,7 +42,7 @@ suppressPackageStartupMessages(library(optparse))
 print_usage <- function() {
   cat("Actual Usage: Rscript ratio.R [options]\n\n")
   cat("Example:\n")
-  cat("  Rscript path-to/ratio.R -i path-to/example_expr_multibatch_log2.csv -m path-to/metadata.csv -o path-to/\n")
+  cat("  Rscript path-to/ratio.R -i path-to/example_expr_multibatch_log2.csv -m path-to/metadata.csv -r D6 -o path-to/\n")
   cat("Note: Make sure to replace path-to/ with your actual file paths\n\n")
 }
 print_usage()
@@ -52,7 +53,9 @@ option_list <- list(
   make_option(c("-i", "--input"), type="character", default=NULL,
               help="Path to the input file, including the expression matrix and metadata."),
   make_option(c("-m", "--metadata"), type="character", default=NULL,
-              help="Path to the metadata file of the input expression. Note: The metadata file must include three columns: bacth, sample and type. Required!"),
+              help="Path to the metadata file of the input expression. Note: The metadata file must include three columns: batch, sample and type. Required!"),
+  make_option(c("-r", "--refsample"), type="character", default=NULL,
+              help="Reference sample to use for calculating ratios. Required!"),
   make_option(c("-o", "--out_dir"), type="character", default="./",
               help="Path to the output directory [default current directory]."),
   make_option(c("-h", "--help"), action="store_true", default=FALSE,
@@ -72,9 +75,9 @@ if (opt$help) {
 }
 
 # Check for required command-line options
-if (is.null(opt$input) || is.null(opt$metadata) || is.null(opt$out_dir)) {
+if (is.null(opt$input) || is.null(opt$metadata) || is.null(opt$refsample) || is.null(opt$out_dir)) {
   print_help(opt_parser)
-  stop("Input file, metadata file, and output directory parameters must be provided.", call.=FALSE)
+  stop("Input file, metadata file, reference sample, and output directory parameters must be provided.", call.=FALSE)
 }
 
 # Read input files and metadata
@@ -97,26 +100,25 @@ meta$sample<-as.character(meta$sample)
 ubatch<-unique(as.character(meta$batch))
 
 # Process expression matrix
-ratio_D6<-matrix(0,ncol=ncol(logFPKM),nrow=nrow(logFPKM))
-rownames(ratio_D6)<-rownames(logFPKM)
-colnames(ratio_D6)<-colnames(logFPKM)  
+ratio_matrix <- matrix(0, ncol=ncol(logFPKM), nrow=nrow(logFPKM))
+rownames(ratio_matrix) <- rownames(logFPKM)
+colnames(ratio_matrix) <- colnames(logFPKM)  
 
-for ( i in 1:length(ubatch)){
-  name<-as.character(meta$library[meta$batch==ubatch[i]])
-  logexpr_batch<-logFPKM[,colnames(logFPKM)%in% name]
-  m<-rowMeans(logexpr_batch[,grep("D6",colnames(logexpr_batch))])
+for (i in 1:length(ubatch)) {
+  name <- as.character(meta$library[meta$batch == ubatch[i]])
+  logexpr_batch <- logFPKM[, colnames(logFPKM) %in% name]
+  m <- rowMeans(logexpr_batch[, grep(opt$refsample, colnames(logexpr_batch))])
   
-  mat<-apply(logexpr_batch,2,function(x){x-m})
+  mat <- apply(logexpr_batch, 2, function(x) { x - m })
   
-  ratio_D6[rownames(mat),colnames(mat)]<-mat
+  ratio_matrix[rownames(mat), colnames(mat)] <- mat
   print(i)
 }
 
-
 # Output results to CSV file
-output_csv <- paste0(opt$out_dir, "/RNA_ratio3D6_", Sys.Date(), ".csv")
-write.csv(ratio_D6, output_csv)
+output_csv <- paste0(opt$out_dir, "/RNA_expression_ratio_", opt$refsample, "_", Sys.Date(), ".csv")
+write.csv(ratio_matrix, output_csv)
 
 # Print completion message
 message("Analysis complete! Results saved to: ")
-message(paste("-RNA_ratio3D6_.csv: ", output_csv))
+message(paste("-RNA_ratio_", opt$refsample, ".csv: ", output_csv))

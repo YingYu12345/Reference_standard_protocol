@@ -16,7 +16,7 @@ option_list <- list(
               help="File name of combined uncertainty. Required!"),
   make_option(c("-r", "--refdata"),type="character",  default=NULL,
               help="File name of reference data in ratio-scale. Required!"),
-  make_option(c("-k", "--k"),type="character",  default=NULL,
+  make_option(c("-k", "--k"),type="numeric",  default=NULL,
               help="Coverage factor. Required!"),
   make_option(c("-h", "--help"), action="store_true", default=FALSE, 
               help="Show this help message and exit")
@@ -29,9 +29,9 @@ opt <- parse_args(OptionParser(option_list=option_list,add_help_option=FALSE))
 #
 
 #test
-opt$uc<-"expr_mat/Refdata_uc_example.csv"
-opt$refdata<-"expr_mat/ref_expr_example.csv"
-opt$k<-2
+# opt$uc<-"expr_mat/Refdata_uc_example.csv"
+# opt$refdata<-"expr_mat/ref_expr_example.csv"
+# opt$k<-2
 
 ##pre analysis
 
@@ -74,4 +74,3 @@ write.csv(refdata_un,uextendfile,row.names=F)
 
 message("Finished!")
 message(paste("Output file: \n",uextendfile,sep=" "))
-
