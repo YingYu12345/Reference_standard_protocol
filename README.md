@@ -12,8 +12,7 @@ Chinese Quartet Multi-Omics Project Official Website: [chinese-quartet.org](http
 
 Welcome to our repository dedicated to the construction of the RNA reference dataset. This repository contains the scripts for this purpose, complemented by detailed instructions outlined in the accompanying article. Below, we provide comprehensive guidance on utilizing these scripts and interpreting the results effectively.
 
-![fig1_overview_of_the_protocol](https://github.com/YingYu12345/Reference_standard_protocol/assets/72855092/c00f8c0c-a850-4763-b7e9-55cdde9494de)
-
+![fig1_overview_of_the_protocol](https://github.com/YingYu12345/Reference_standard_protocol/assets/72855092/c1e24325-76a0-48e5-84d7-fbfd48deecdd)
   **Overview of the protocol**
 
 Establishing RNA materials and reference datasets involves three stages: (a) reference materials, (b) ratio-based reference datasets, and (c) applications.
