@@ -1,18 +1,19 @@
 # Construction of RNA reference materials for improving the quality of transcriptomic data
 
-RNA reference materials and the corresponding reference datasets that act as the “ground truth” of the measurement values are indispensable tools for assessing the reliability of RNA-seq in detecting intrinsically small biological differences in clinical settings such as those between molecular subtypes of diseases. However, constructing RNA reference datasets is challenging because of the incomparability of conventional “absolute” expression profiles across different batches, methods, or platforms. We recently proposed a ratio-based method for constructing reference datasets. The ratio for a gene is defined as the division of the expression levels between two sample groups and has demonstrated much better agreement than “absolute” data across multiple transcriptomic technologies and batches, resulting in the successful generation of omics-wide reference datasets with satisfied uncertainty.
+RNA reference materials and the corresponding reference datasets that act as the “ground truth” of the measurement values are indispensable tools for assessing the reliability of RNA-seq in detecting intrinsically small biological differences in clinical settings, such as those between molecular subtypes of diseases. However, constructing RNA reference datasets is challenging because conventional “absolute” expression profiles are incomparable across different batches, methods, or platforms. We recently proposed a ratio-based method for constructing reference datasets. The ratio for a gene is defined as the division of the expression levels between two sample groups and has demonstrated much better agreement than “absolute” data across multiple transcriptomic technologies and batches, resulting in the successful generation of omics-wide reference datasets with satisfied uncertainty.
 
 In this protocol, we provide a step-by-step description of the procedures for establishing RNA reference materials and reference datasets, covering the following three stages: (1) **reference materials**, including material preparation, homogeneity testing, and stability testing; (2) **ratio-based reference datasets**, including characterization, uncertainty estimation, and orthogonal validation; and (3) **applications**, including definition of performance metrics, performing proficiency test, and diagnosing and correcting batch effects. 
 
-The protocol has been used for establishing the Quartet RNA reference materials and reference datasets ([chinese-quartet.org](https://chinese-quartet.org)) that have been approved as the first suite of certified RNA reference materials by China’s State Administration for Market Regulation as the First Class of National Reference Materials. The protocol can be utilized to establish and/or apply reference materials to improve RNA-seq data quality in diverse clinical utilities.
+The protocol has been used to establish the Quartet RNA reference materials and reference datasets ([chinese-quartet.org](https://chinese-quartet.org)) that have been approved by China's State Administration for Market Regulation as the first suite of certified RNA reference materials as the First Class of National Reference Materials. The protocol can be utilized to establish and/or apply reference materials to improve RNA-seq data quality in diverse clinical utilities.
 
 
 ## About
 Chinese Quartet Multi-Omics Project Official Website: [chinese-quartet.org](https://chinese-quartet.org)
 
-Welcome to our repository dedicated to the construction of the RNA reference dataset. This repository contains the scripts utilized for this purpose, complemented by detailed instructions outlined in the accompanying article. Below, we provide comprehensive guidance on utilizing these scripts and interpreting the results effectively.
+Welcome to our repository dedicated to the construction of the RNA reference dataset. This repository contains the scripts for this purpose, complemented by detailed instructions outlined in the accompanying article. Below, we provide comprehensive guidance on utilizing these scripts and interpreting the results effectively.
 
-![alt text](fig1_overview_of_the_protocol.png)
+![fig1_overview_of_the_protocol](https://github.com/YingYu12345/Reference_standard_protocol/assets/72855092/c00f8c0c-a850-4763-b7e9-55cdde9494de)
+
   **Overview of the protocol**
 
 Establishing RNA materials and reference datasets involves three stages: (a) reference materials, (b) ratio-based reference datasets, and (c) applications.
@@ -94,10 +95,10 @@ conda deactivate
 
 ## Usage
 
-> The following provides detailed instructions only for the use of the involved R scripts. For step-by-step details, please refer to the accompanying protocol article.
+> The following provides detailed instructions only for using the involved R scripts. For step-by-step details, please refer to the accompanying protocol article.
 
 ### RNA-seq
-▲CRITICAL Detailed procedures are provided in the Supplementary methods. All the command examples use the raw fastq data of sample D5_1 from batch R_BGI_L3_B1 in this protocol.
+▲CRITICAL Detailed procedures are provided in the Supplementary Methods section. All the command examples use the raw fastq data of sample D5_1 from batch R_BGI_L3_B1 in this protocol.
 #### Alignment and gene quantification 
 1.	Use fastp to remove adapter sequences from fastq files. For a detailed description of fastp, visit https://github.com/OpenGene/fastp.
 2.	Perform RNA-seq alignment and gene-level quantification using HISAT, StringTie, and Ballgown tools. Specifically, use HISAT to map the trimmed reads to the reference genome, such as GRCh38. Then use StringTie to assemble and estimate gene abundances for each sample. Next, use Ballgown to create read-count and FPKM (Fragments Per Kilobase of transcript per Million mapped reads) matrices. [Pertea et al.](https://www.nature.com/articles/nprot.2016.095) provided a detailed protocol for these tools.
@@ -110,19 +111,19 @@ conda deactivate
 1.	Perform quality control on sequence data in fastq files using FastQC. For a detailed description of FastQC, visit https://www.bioinformatics.babraham.ac.uk/projects/fastqc/.
 2.	Use FastQC on the fastq files generated by fastp to verify the success of adapter removal.
 3.	Use FastQ Screen on the fastq files generated by fastp to detect potential contamination with other species, junction primers, etc. For a detailed description of FastQ Screen, visit https://www.bioinformatics.babraham.ac.uk/projects/fastq_screen/
-4.	Use Qualimap2 to calculate the quality of the reads that are mapped to different genomic regions. For a detailed description of Qualimap2, visit http://qualimap.conesalab.org/.
+4.	Use Qualimap2 to calculate the quality of the reads mapped to different genomic regions. For a detailed description of Qualimap2, visit http://qualimap.conesalab.org/.
 
 ▲CRITICAL Qualimap takes longer to run and requires more computational resources, whereas the RNA-seq QC module may not run successfully due to version issues.
 
-5.	Use MultiQC to merge the QC results from FastQC, FastQ Screen and Qualimap. For a detailed description of MultiQC, visit https://multiqc.info/.
+5.	Use MultiQC to merge the QC results from FastQC, FastQ Screen, and Qualimap. For a detailed description of MultiQC, visit https://multiqc.info/.
 
 ### Homogeneity testing
-1.	Perform statistical analysis (e.g. ANOVA) to compare the variation between the expression profiles of genes within-unit and those between-unit groups. The expression profiles are obtained from RNA-seq analysis.
-2.	Calculate the adjusted p values with "fdr" method (e.g. "fdr" for Benjamini-Hochberg). A gene is considered homogeneous if the FDR-adjust ANOVA-based p >0.05, indicating no significant difference between within-unit and between-unit groups.
+1.	Perform statistical analysis (e.g., ANOVA) to compare the variation between the expression profiles of genes within-unit and those between-unit groups. The expression profiles are obtained from RNA-seq analysis.
+2.	Calculate the adjusted p values with the "fdr" method (e.g., "fdr" for Benjamini-Hochberg). A gene is considered homogeneous if the FDR-adjust ANOVA-based p >0.05, indicating no significant difference between within-unit and between-unit groups.
 
-▲CRITICAL The homogeneous analysis used here is relative loose. Users can choose a more robust test of homogeneity.
+▲CRITICAL The homogeneous analysis used here is relatively loose. Users can choose a more robust test of homogeneity.
 
-3.	Calculate the proportion of genes meeting the homogeneity criterion. If a majority of genes (e.g. >95%) shows homogeneity, the reference material is recognized as homogeneous.
+3.	Calculate the proportion of genes meeting the homogeneity criterion. If a majority of genes (e.g.,>95%) show homogeneity, the reference material is recognized as homogeneous.
 
 Run the script homogeneity_assess.R to execute:
 
@@ -131,10 +132,10 @@ Rscript path-to/homogeneity_assess.R -i path-to/example_expr_homo_log2.csv -m pa
 ```
 ▲CRITICAL Two files will be obtained after successfully implementing the script, including: (1) the proportion of genes that meet the homogeneity criterion (homogeneity_Ftest_summary_(date).csv); (2) the results of homogeneity of each gene under estimation (homogeneity_Ftest_detail_(date).csv). 
 
-**PS: `path-to/` should be replaced with the actual file path, and the same applies to all instances below.**
+**PS: `path-to/` should be replaced with the actual file path, which applies to all instances below.**
 
 ### Stability testing
-Calculate ratio of RIN values using one reference material as the denominator. Perform regression analysis for each gene using lm() function to estimate the observed slope and uncertainty of slope of RIN values across time points. If the observed slope is smaller than the uncertainty of the slope multiplied by the confidence level, the materials are stable. 
+Calculate the ratio of RIN values using one reference material as the denominator. Perform regression analysis for each gene using lm() function to estimate the observed slope and uncertainty of slope of RIN values across time points. If the observed slope is smaller than the uncertainty of the slope multiplied by the confidence level, the materials are stable. 
 
 Run the script stability_assess.R:
 ```
@@ -143,17 +144,17 @@ Rscript path-to/stability_assess.R -i path-to/example_expr_stability_RIN.csv -m 
 ▲CRITICAL One file named stability_lm_detail_(date).csv)will be obtained after successfully implementing the script, illustrating the results of stability of each gene or RNA RIN values under estimation. 
 
 ### Characterization
-![alt text](fig4_workflow_of_characterization_of_reference_datasets.png)
+![fig4_workflow_of_characterization_of_reference_datasets](https://github.com/YingYu12345/Reference_standard_protocol/assets/72855092/bff73c7f-a111-443a-b6b7-bd21fd680595)
 #### Data quality control based on expression profiles
 1. Perform principal component analysis (PCA) to visualize the major sources of variation of high-dimensional data in each batch. Use prcomp() function in R.
 
-2.	Calculate signal-to-noise ratio (SNR). SNR is a measure often expressed in decibels that quantifies the strength of a signal relative to the background noise. For RNA-seq data, the “signal” is the average distance that represents inherent “differences” among various biological sample groups, whereas the “noise” is the average distance among technical replicates within the same sample group in a space with reduced dimensionality. Generally, a lower SNR value suggests less discriminative power, and vice versa. In our research, we have established the SNR threshold of 12. 
+2.	Calculate signal-to-noise ratio (SNR). SNR is a measure often expressed in decibels that quantifies the strength of a signal relative to the background noise. For RNA-seq data, the “signal” is the average distance that represents inherent “differences” among various biological sample groups, whereas the “noise” is the average distance among technical replicates within the same sample group in a space with reduced dimensionality. Generally, a lower SNR value suggests less discriminative power and vice versa. In our research, we have established the SNR threshold of 12. 
 
 Run the script SNR_qc.R:
 ```
 Rscript path-to/SNR_qc.R -i path-to/example_expr_multibatch_log2.csv -m path-to/metadata.csv -o path-to/
 ```
-▲CRITICAL Three files will be obtained after successfully implementing the script, including: (1) the SNR value of the expression profiles of each batch (SNR_perBatch_(date).csv); (2) scatter plots of the PCA results with the SNR value for each batch (SNR_(batch)_(date).pdf); and (3) a scatter plot of the PCA results with SNR value across all batches (SNR_allBatch_(date).pdf).
+▲CRITICAL Three files will be obtained after successfully implementing the script, including (1) the SNR value of the expression profiles of each batch (SNR_perBatch_(date).csv); (2) scatter plots of the PCA results with the SNR value for each batch (SNR_(batch)_(date).pdf); and (3) a scatter plot of the PCA results with SNR value across all batches (SNR_allBatch_(date).pdf).
 
 #### Identification of high-confidence detected genes
 1.	Define expression criteria for considering a gene as expressed in a sample. A gene is considered expressed in a library in each batch if more than three reads were mapped to it in at least two of the three replicates. 
@@ -169,18 +170,18 @@ Rscript path-to/char_detect.R -i path-to/example_expr_multibatch_count.csv -m pa
 
 #### Characterization of reference datasets at the ratio level 
 1.	Identify the detectable genes across the two groups of each sample pair.
-2.	Determine the ratio-based expressions based on detectable genes, as follows:
-a)	Obtain ratio-based expression data for each batch, calculated on a per-gene basis.
+2.	Determine the ratio-based expressions based on detectable genes as follows:
+a)	Obtain ratio-based expression data for each batch, calculated per-gene basis.
 b)	Use log2FPKM values to calculate these ratio-based expressions.
 c)	For each gene, first compute the mean of the expression profiles of replicates of one group of the reference materials.
 d)	Subtract this mean from the log2FPKM values of that gene in each batch to obtain the ratio-based expressions.
-3.	To improve the reliability of the reference values, select genes that meet the threshold of p < 0.05 in each sample pair using limma method. 
+3.	To improve the reliability of the reference values, select genes that meet the threshold of p < 0.05 in each sample pair using the limma method. 
 
 Run the script deg_limma.R using the following command: 
 ```
 Rscript path-to/deg_limma.R -i path-to/example_expr_multibatch_count.csv -m path-to/metadata char.csv -o path-to/
 ```
-▲CRITICAL A file named DEG_limma_(date).csv will be generated upon successful script implementation. The file includes log2-transformed fold change (log2FC), averaged expression across both sample groups, t values, p values, FDR-adjusted p values and differentially expressed classification of each gene in each sample pair. 
+▲CRITICAL A file named DEG_limma_(date).csv will be generated upon successful script implementation. The file includes log2-transformed fold change (log2FC), averaged expression across both sample groups, t values, p values, FDR-adjusted p values, and differentially expressed gene classification in each sample pair. 
 
 4.	Perform the Shapiro-Wilk test to check the normality of the ratio-based expressions. Ensure that data comply with normal distribution for statistical tests. 
 
@@ -188,7 +189,7 @@ Run the script normality.R using the following command:
 ```
 Rscript path-to/normality.R -i path-to/DEG_limma_(date).csv -p path-to/batch_included.csv -o path-to/
 ```
-▲CRITICAL A file named normality_genelist_(date).csv will be generated upon successful script implementation. The file contains p values of Shapiro-Wilk test based on the ratio-based expression of each gene in the reference datasets. 
+▲CRITICAL A file named normality_genelist_(date).csv will be generated upon successful script implementation. The file contains p values of the Shapiro-Wilk test based on the ratio-based expression of each gene in the reference datasets. 
 
 5.	Generate reference datasets at the ratio level for each pair of reference materials in the format of a mean by summarizing high-quality RNA-seq datasets. 
 
@@ -196,7 +197,7 @@ Run the script char_ratio.R using the following command:
 ```
 Rscript path-to/char_ratio.R -i path-to/example_expr_multibatch_count.csv -m path-to/metadata.csv -g path-to/detect_genelist_(date).csv -d path-to/DEG_limma_(date).csv -o path-to/
 ```
-▲CRITICAL A file named ref_expr_(date).csv will be generated upon successful script implementation. The file contains ratio-based expression of reference datasets, providing information on FC and median of limma-based p value for each gene.
+▲CRITICAL A file named ref_expr_(date).csv will be generated upon successful script implementation. The file contains ratio-based expressions of reference datasets, providing information on FC and the median of limma-based p-value for each gene.
 
 #### Identification of reference DEGs
 Identify reference DEGs across high-quality batches. A gene is considered as a reference DEG between two sample groups if it is consistently categorized as an up- or down-regulated gene in more than a certain percentage of high-quality batches. In our study, we employed an arbitrary cutoff of 1/3. 
@@ -227,15 +228,15 @@ Rscript path-to/ubb.R -i path-to/example_expr_homo_log2.csv -m path-to/metadata_
 
 ▲CRITICAL Upon successful script implementation, one file named  Refdata_ubb_(date).csv will be generated, containing the characterization uncertainty of each gene in the reference datasets.
 
-3.	Instability uncertainty. Instability uncertainty accounts for variations over time due to environmental conditions, or other factors. It can be calculated using RNA-seq datasets or RIN values to illustrate overall RNA integrity. In our study, we employed linear regression profiles of RIN to represent overall instability. 
+3.	Instability uncertainty. Instability uncertainty accounts for variations over time due to environmental conditions or other factors. It can be calculated using RNA-seq datasets or RIN values to illustrate overall RNA integrity. Our study employed linear regression profiles of RIN to represent overall instability. 
 
 Run the script:
 ```
 Rscript path-to/us.R -i path-to/example_expr_stability_RIN.csv -m path-to/metadata_stability_RIN.csv -r path-to/ref_expr_(date).csv -t R -o path-to/
 ```
-▲CRITICAL Upon successful script implementation, one file named Refdata_us_(date).csv will be generated, containing instability uncertainty of each gene in the reference datasets.
+▲CRITICAL Upon successful script implementation, one file named Refdata_us_(date).csv will be generated, containing the instability uncertainty of each gene in the reference datasets.
 
-4.	Combined uncertainty. Combined uncertainty accounts for all sources of uncertainty affecting a measurement, including characterization uncertainty, inhomogeneity uncertainty, and instability uncertainty. 
+4.	Combined uncertainty. Combined uncertainty accounts for all sources affecting a measurement, including characterization uncertainty, inhomogeneity uncertainty, and instability uncertainty. 
 
 Run the script: 
 ```
@@ -252,13 +253,13 @@ Rscript path-to/U.R -d Refdata_uc_(date).csv -r path-to/ref_expr_(date).csv -k 2
 ▲CRITICAL A file named Refdata_U_(date).csv will be generated upon successful script implementation. These files contain the extended uncertainty of each gene in the reference datasets.
 
 ### Construction of performance metrics
-1.	Calculate relative correlation with reference datasets (RC) metrics. RC is calculated based on the Pearson correlation coefficient between the ratio-based expression levels of a dataset for a given pair of sample groups and the corresponding reference fold-change values (transformed to log2-scale). It is referred to as the “relative correlation with reference datasets” metric, representing the numerical consistency of the ratio-based expression profiles. To improve reliability, calculate the mean of the three replicates of each sample group before performing ratio-based expression analysis. 
+1.	Calculate relative correlation with reference datasets (RC) metrics. RC is calculated based on the Pearson correlation coefficient between the ratio-based expression levels of a dataset for a given pair of sample groups and the corresponding reference fold-change values (transformed to log2-scale). It is called the “relative correlation with reference datasets” metric, representing the numerical consistency of the ratio-based expression profiles. To improve reliability, calculate the mean of the three replicates of each sample group before performing ratio-based expression analysis. 
 
 Run the script:
 ```
 Rscript path-to/qc_rc.R -i path-to/example_log2_limma_data.csv -r path-to/example_ref_data.csv -o path-to/
 ```
-▲CRITICAL A file named RC_each_batch_(date).csv will be generated upon successful script implementation. This file contains the RC values between the test datasets and reference datasets for each batch.
+▲CRITICAL A file named RC_each_batch_(date).csv will be generated upon successful script implementation. This file contains the RC values between each batch's test and reference datasets.
 
 2.	Calculate the Matthews Correlation Coefficient (MCC) of reference DEGs. MCC measures the consistency of DEGs detected from a dataset for a given pair of samples with those from the reference DEGs, or “MCC of DEGs”, as follows:
 a)	Repeat Step 86 to identify DEGs and non-DEGs of a test dataset.
@@ -270,17 +271,17 @@ Run the script:
 ```
 Rscript path-to/qc_mcc.R -i path-to/example_log2_limma_data.csv -r path-to/example_ref_data.csv -o path-to/
 ```
-▲CRITICAL A file named MCC_each_batch_(date).csv will be generated upon successful script implementation. This file contains the TP, TN, FP, FN, and MCC values between the test datasets and reference datasets for each batch.
+▲CRITICAL A file named MCC_each_batch_(date).csv will be generated upon successful script implementation. This file contains the TP, TN, FP, FN, and MCC values between each batch's test and reference datasets.
 
-3.	Calculate the root mean square error (RMSE), using fold-changes between a test dataset for a given pair of samples and the corresponding ratio-based reference datasets, representing the average distances of ratio-based expression profiles. Fold-changes were transformed using log2 scaling. Use rmse() function Metrics package for implementation. 
+3.	Calculate the root mean square error (RMSE) using fold-changes between a test dataset for a given pair of samples and the corresponding ratio-based reference datasets, representing the average distances of ratio-based expression profiles. Fold-changes were transformed using log2 scaling. Use rmse() function Metrics package for implementation. 
 Run the script: 
 ```
 Rscript path-to/qc_rmse.R -i path-to/example_log2_limma_data.csv -r path-to/example_ref_data.csv -o path-to/
 ```
-▲CRITICAL A file named RMSE_each_batch_(date).csv will be generated upon successful script implementation. This file contains the RMSE value between test datasets and reference datasets for each batch.
+▲CRITICAL A file named RMSE_each_batch_(date).csv will be generated upon successful script implementation. This file contains the RMSE value between test and reference datasets for each batch.
 
 ### Diagnosis and correction of batch effects
-1.	Use the principal variance component analysis (PVCA) method to assess whether batch effects are present in the dataset. When combined with bar plots, PVCA can be utilized to quantify and visualize the proportion of variations attributed to experimental effects, including batch effects. 
+1.	Use the principal variance component analysis (PVCA) method to assess whether batch effects are present in the dataset. When combined with bar plots, PVCA can quantify and visualize the proportion of variations attributed to experimental effects, including batch effects. 
 
 Run the script: 
 ```
@@ -290,14 +291,14 @@ Rscript path-to/pvca.R -i path-to/example_expr_multibatch_log2.csv -m path-to/me
 ```
 ! CAUTION PVCA installation requires more dependent packages and may conflict with other R package versions. Creating a conda environment dedicated to PVCA analysis was recommended.
 
-▲CRITICAL Two files will be obtained after successfully implementing the script, including (1) PVCA value of the expression profiles of multiple batches (PVCA_(date).csv); and (2) a bar plot of the PVCA results of the expression profiles of multiple batches (PVCA_plot_(date).pdf).
+▲CRITICAL Two files will be obtained after successfully implementing the script, including (1) PVCA value of the expression profiles of multiple batches (PVCA_(date).csv) and (2) a bar plot of the PVCA results of the expression profiles of multiple batches (PVCA_plot_(date).pdf).
 
-2.	If batch effects are detected or suspected, a reference-material-based ratio method should be applied for batch-effect correction. Specifically, ratio-based expression data are obtained within each batch on a gene-by-gene basis. For each gene, calculate the mean of expression profiles (e.g. log2FPKM) of replicates of reference sample(s), and then subtract it from the log2FPKM values of that gene in each study. 
+2.	A reference-material-based ratio method should be applied for batch-effect correction if batch effects are detected or suspected. Specifically, ratio-based expression data are obtained within each batch on a gene-by-gene basis. For each gene, calculate the mean of expression profiles (e.g. log2FPKM) of replicates of reference sample(s), and then subtract it from the log2FPKM values of that gene in each study. 
 Run the script: 
 ```
 Rscript path-to/ratio.R -i path-to/example_expr_multibatch_log2.csv -m path-to/metadata.csv -o path-to/
 ```
-▲CRITICAL Samples that will be used as denominator for performing ratio-based method shall be annotated in metadata.csv file. 
+▲CRITICAL Samples that will be used as the denominator for performing the ratio-based method shall be annotated in the metadata.csv file. 
 
 ▲CRITICAL This step is not obligatory and depends on the preceding diagnostic results. We recommend to use log2-transformed FPKM data in this step. A file named RNA_expression_ratio_(date).csv will be obtained after successfully implementing the script, which contains the ratio-based expression profiles of each gene. 
 
@@ -313,7 +314,7 @@ The CSV file has the following columns:
 3. **length_total**: The total number of genes tested.
 4. **length_ratio**: The proportion of significant genes (`length_sig` / `length_total`).
 
-The data in this file can be used to quickly assess the homogeneity of gene expression values across different samples. The columns provide insight into the number of significant genes (those that meet the homogeneity criterion) and their proportion in relation to the total number of genes tested. This summary can help identify samples with a higher proportion of homogeneous gene expression patterns.
+The data in this file can be used to quickly assess the homogeneity of gene expression values across different samples. The columns provide insight into the number of significant genes (those that meet the homogeneity criterion) and their proportion concerning the total number of genes tested. This summary can help identify samples with a higher proportion of homogeneous gene expression patterns.
 
 For more detailed information on individual gene results, refer to the corresponding `homogeneity_Ftest_detail_(date).csv` file.
 
@@ -325,7 +326,7 @@ The CSV file has the following columns:
 2. **gene**: The gene identifier (e.g., "ENSG00000239951").
 3. **anova_p**: The p-value from the ANOVA test.
 4. **mean_between**: The mean expression level between different groups.
-5. **mean_intra**: The mean expression level the same group.
+5. **mean_intra**: The mean expression level is the same group.
 6. **fdr**: The false discovery rate adjusted for multiple testing. A lower FDR indicates a higher confidence in the significance of the test results.
 
 The data in this file can be used to assess the homogeneity of gene expression values between and within groups in different samples. The ANOVA p-values help determine the significance of differences, while the mean values and FDR provide additional context for the results.
@@ -389,7 +390,7 @@ This file provides a summary of the Signal-to-Noise Ratio (SNR) analysis for dif
   - Example: `down-regulate` indicates that the gene is down-regulated in the comparison.
 
 #### the output of normality.R:
-**normality_genelist_(date).csv**: The file contains p values of Shapiro-Wilk test based on the ratio-based expression of each gene in the reference datasets.
+**normality_genelist_(date).csv**: The file contains p values ofv the Shapiro-Wilk test based on the ratio-based expression of each gene in the reference datasets.
 
 1. **gene_compare**: Combination of gene identifier and comparison.
 2. **log2fc_p**: P-value from the Shapiro-Wilk normality test for the log2FC values.
@@ -397,7 +398,7 @@ This file provides a summary of the Signal-to-Noise Ratio (SNR) analysis for dif
 4. **compare**: Comparison identifier (e.g., D5/D6).
 
 #### the output of char_ratio.R:
-**ref_expr_(date).csv**: The file contains ratio-based expression of reference datasets, providing information on FC and median of limma-based p value for each gene.
+**ref_expr_(date).csv**: The file contains the ratio-based expression of reference datasets, providing information on FC and median of limma-based p value for each gene.
 
 1. **Var1**: Row identifier (index).
 2. **Freq**: Frequency of detection across batches.
@@ -436,7 +437,7 @@ This file provides a summary of the Signal-to-Noise Ratio (SNR) analysis for dif
 4. **uchar**: UCHAR value for the gene in the specified comparison. It represents the relative standard error of the fold change, multiplied by 100.
 
 #### the output of ubb.R:
-**Refdata_ubb_(date).csv**: This file contains the characterization uncertainty of each gene in the reference datasets.
+**Refdata_ubb_(date).csv**: This file contains the homogenity uncertainty of each gene in the reference datasets.
 
 1. **gene**: The gene identifier (e.g., "ENSG00000001461").
 2. **compare**: The comparison group, indicating the samples being compared (e.g., "F7/D6").
@@ -535,8 +536,5 @@ Freq: Frequency of the gene appearing in the specified comparison.
 > Yu, Y., Hou, W., Liu, Y. et al. Quartet RNA reference materials improve the quality of transcriptomic data through ratio-based profiling. Nat Biotechnol (2023). https://doi.org/10.1038/s41587-023-01867-9
         
         
-        
-        
-
 ## Contact
 If you have any questions, please feel free to contact us at quartet@fudan.edu.cn.
